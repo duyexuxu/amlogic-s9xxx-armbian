@@ -187,7 +187,11 @@ jobs:
           ln -sf /builder/build ${{ github.workspace }}/build
           ln -sf /builder/build /home/runner/work/_actions/ophub/amlogic-s9xxx-armbian/main/build
           echo "status=success" >> ${GITHUB_OUTPUT}
-
+      - name: Clean build environment
+        run: |
+          sudo rm -rf build/output
+          sudo rm -rf build/cache
+          echo "Cleaning done"
       - name: Compile Armbian [ ${{ matrix.release }} ]
         id: compile
         working-directory: /builder
