@@ -298,15 +298,15 @@ on:
         options:
           - ophub/kernel
       kernel_usage:
-        description: "Set the kernel release tag."
+        description: "Set the kernel release tag."          # >>> 修改：描述更通用
         required: false
-        default: "rk35xx"
+        default: "rk35xx"                                    # >>> 修改：默认 rk35xx，匹配 RK3568 内核分类
         type: choice
         options:
           - stable
           - flippy
           - beta
-          - rk35xx
+          - rk35xx                                           # >>> 修改：新增 rk35xx 选项
       armbian_fstype:
         description: "Select armbian rootfs type."
         required: false
@@ -475,37 +475,6 @@ jobs:
           make_latest: true
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 
-      # >>> 新增：修改 model_database.conf，把 6.1.115 加入 nsy-g16-plus 支持列表
-      - name: Patch kernel support list for nsy-g16-plus
-        run: |
-          ACTION_DIR="/home/runner/work/_actions/ophub/amlogic-s9xxx-armbian/main"
-          CONF_FILE="${ACTION_DIR}/model_database.conf"
-
-          if [[ ! -f "${CONF_FILE}" ]]; then
-            echo "ERROR: ${CONF_FILE} not found"
-            echo "Searching for database files in action directory..."
-            find "${ACTION_DIR}" -maxdepth 3 -type f \( -name "*.conf" -o -name "*model*" -o -name "*database*" \) 2>/dev/null | head -20
-            exit 1
-          fi
-
-          echo "=== Before patch ==="
-          grep -n "nsy-g16-plus" "${CONF_FILE}" || echo "nsy-g16-plus not found in ${CONF_FILE}"
-
-          sudo cp "${CONF_FILE}" "${CONF_FILE}.bak"
-
-          # 情况1：内核列表在引号内，如 "6.6.y 6.12.y 6.18.y"
-          if grep "nsy-g16-plus" "${CONF_FILE}" | grep -q '"'; then
-            sudo sed -i '/nsy-g16-plus/ s/"\([^"]*\)"/"\1 6.1.115"/' "${CONF_FILE}"
-          fi
-
-          # 情况2：无引号，在行末追加
-          if ! grep "nsy-g16-plus" "${CONF_FILE}" | grep -q "6.1.115"; then
-            sudo sed -i '/nsy-g16-plus/ s/$/ 6.1.115/' "${CONF_FILE}"
-          fi
-
-          echo "=== After patch ==="
-          grep -n "nsy-g16-plus" "${CONF_FILE}" || true
-
       - name: Rebuild Armbian for target boards
         uses: ophub/amlogic-s9xxx-armbian@main
         if: ${{ steps.clean.outputs.status == 'success' && !cancelled() }}
@@ -516,7 +485,7 @@ jobs:
           armbian_kernel: ${{ inputs.armbian_kernel }}
           auto_kernel: ${{ inputs.auto_kernel }}
           kernel_repo: ${{ inputs.kernel_repo }}
-          kernel_usage: ${{ inputs.kernel_usage }}
+          kernel_usage: ${{ inputs.kernel_usage }}       # >>> 现在会传入 rk35xx
           armbian_fstype: ${{ inputs.armbian_fstype }}
           builder_name: ${{ inputs.builder_name }}
 
