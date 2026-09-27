@@ -12,7 +12,7 @@ on:
       set_release:
         description: "Select OS Release."
         required: false
-        default: "trixie"                # 改成单个发行版，避免重复编译
+        default: "trixie"
         type: choice
         options:
           - all
@@ -23,7 +23,7 @@ on:
       armbian_board:
         description: "Select device board."
         required: false
-        default: "nsy-g16-plus"          # 默认改为 NSY G16 Plus
+        default: "nsy-g16-plus"          # 目标板：NSY G16 Plus
         type: choice
         options:
           - allwinner
@@ -272,10 +272,10 @@ on:
       armbian_kernel:
         description: "Select kernel version."
         required: false
-        default: "6.1.115"                # 默认锁定 6.1.115
+        default: "6.1.115"                # 保持 6.1.115
         type: choice
         options:
-          - "6.1.115"                       # 精确版本，放在最前面
+          - "6.1.115"
           - 5.10.y
           - 5.15.y
           - 6.1.y
@@ -290,7 +290,7 @@ on:
       auto_kernel:
         description: "Auto use the latest kernel (must be false for exact version)."
         required: false
-        default: false                     # 关键：默认 false
+        default: false
         type: boolean
       kernel_repo:
         description: "Set the kernel repository."
@@ -302,12 +302,13 @@ on:
       kernel_usage:
         description: "Set the tags of the stable kernel."
         required: false
-        default: "stable"
+        default: "rk35xx"                # 关键修改：改为 rk35xx
         type: choice
         options:
           - stable
           - flippy
           - beta
+          - rk35xx                        # 新增：RK3528/RK3566/RK3568 专用内核标签
       armbian_fstype:
         description: "Select armbian rootfs type."
         required: false
@@ -439,7 +440,6 @@ jobs:
           [[ -z "${config_board}" ]] && config_board="odroidn2"
 
           cd build/
-          # 注意：这里编译的只是"基础 rootfs"，内核后面会被 ophub 步骤替换为 6.1.115
           ./compile.sh RELEASE=${{ matrix.release }} BOARD=${config_board} BRANCH=current BUILD_MINIMAL=no \
                        BUILD_ONLY=default HOST=armbian BUILD_DESKTOP=no EXPERT=yes KERNEL_CONFIGURE=no \
                        COMPRESS_OUTPUTIMAGE="sha" SHARE_LOG=yes
@@ -480,7 +480,7 @@ jobs:
           armbian_path: build/output/images/*.img.gz
           armbian_board: ${{ inputs.armbian_board }}
           armbian_kernel: ${{ inputs.armbian_kernel }}
-          auto_kernel: ${{ inputs.auto_kernel }}      # 关键：改为引用输入，默认 false
+          auto_kernel: ${{ inputs.auto_kernel }}
           kernel_repo: ${{ inputs.kernel_repo }}
           kernel_usage: ${{ inputs.kernel_usage }}
           armbian_fstype: ${{ inputs.armbian_fstype }}
