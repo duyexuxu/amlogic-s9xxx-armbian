@@ -272,9 +272,10 @@ on:
       armbian_kernel:
         description: "Select kernel version."
         required: false
-        default: "6.1.115"                # 保持 6.1.115
+        default: "5.10.160"                # 使用 5.10.160 内核
         type: choice
         options:
+          - "5.10.160"                     # 精确版本，放在最前面
           - "6.1.115"
           - 5.10.y
           - 5.15.y
@@ -302,13 +303,13 @@ on:
       kernel_usage:
         description: "Set the tags of the stable kernel."
         required: false
-        default: "rk35xx"                # 关键修改：改为 rk35xx
+        default: "rk35xx"                # RK3568 专用 BSP 内核标签
         type: choice
         options:
           - stable
           - flippy
           - beta
-          - rk35xx                        # 新增：RK3528/RK3566/RK3568 专用内核标签
+          - rk35xx
       armbian_fstype:
         description: "Select armbian rootfs type."
         required: false
@@ -472,7 +473,7 @@ jobs:
           make_latest: true
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Rebuild Armbian for target boards (kernel 6.1.115)
+      - name: Rebuild Armbian for target boards (kernel 5.10.160)
         uses: ophub/amlogic-s9xxx-armbian@main
         if: ${{ steps.clean.outputs.status == 'success' && !cancelled() }}
         with:
